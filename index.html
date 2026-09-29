@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oceanix Guard - Panel de monitoreo</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; background: #f2f6f8; color: #17324d; }
+  header { background: #17324d; color: #fff; padding: 16px 24px; }
+  header h1 { margin: 0; font-size: 22px; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: .85; }
+  main { padding: 20px 24px; max-width: 900px; margin: auto; }
+  .barra { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+  select, button { padding: 8px 12px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .tarjeta { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.12); border-top: 5px solid #0a7c86; }
+  .tarjeta h3 { margin: 0 0 6px; font-size: 15px; }
+  .valor { font-size: 32px; font-weight: bold; }
+  .valor small { font-size: 14px; font-weight: normal; }
+  svg { width: 100%; height: 55px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Oceanix Guard · Panel de monitoreo</h1>
+  <p>Datos simulados de sensores · se actualizan cada 30 s · próxima actualización en <b id="cuenta">30</b> s</p>
+</header>
+<main>
+  <div class="barra">
+    <label>Jaula:
+      <select id="jaula">
+        <option value="1">Jaula 1</option>
+        <option value="2">Jaula 2</option>
+        <option value="3">Jaula 3</option>
+      </select>
+    </label>
+    <button id="ahora">Actualizar ahora</button>
+  </div>
+  <div id="tarjetas" class="grid"></div>
+</main>
+
+<script src="sensores.js"></script>
+<script>
+const VARIABLES = [
+  ['temperatura', 'Temperatura', '°C'],
+  ['ph', 'pH', ''],
+  ['oxigeno', 'Oxígeno disuelto', 'mg/L']
+];
+const datos = { 1: [], 2: [], 3: [] };
+let segundos = 30;
+
+function linea(serie) {
+  if (serie.length < 2) return '';
+  const mn = Math.min(...serie), mx = Math.max(...serie), r = (mx - mn) || 1;
+  return serie.map((v, i) =>
+    (i * (200 / 19)).toFixed(1) + ',' + (50 - ((v - mn) / r) * 45).toFixed(1)
+  ).join(' ');
+}
+
+function pintar() {
+  const jaula = document.getElementById('jaula').value;
+  const historial = datos[jaula];
+  const ultima = historial[historial.length - 1];
+  document.getElementById('tarjetas').innerHTML = VARIABLES.map(([k, nombre, unidad]) =>
+    `<div class="tarjeta">
+       <h3>${nombre}</h3>
+       <div class="valor">${ultima[k]} <small>${unidad}</small></div>
+       <svg viewBox="0 0 200 55"><polyline fill="none" stroke="#0a7c86" stroke-width="2" points="${linea(historial.map(x => x[k]))}"/></svg>
+     </div>`).join('');
+}
+
+function actualizar() {
+  for (const j in datos) {
+    datos[j].push(leerSensores(false));
+    if (datos[j].length > 20) datos[j].shift();
+  }
+  segundos = 30;
+  pintar();
+}
+
+document.getElementById('jaula').addEventListener('change', pintar);
+document.getElementById('ahora').addEventListener('click', actualizar);
+setInterval(() => {
+  segundos--;
+  if (segundos <= 0) actualizar();
+  document.getElementById('cuenta').textContent = segundos;
+}, 1000);
+actualizar();
+</script>
+</body>
+</html>
