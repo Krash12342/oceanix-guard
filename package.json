@@ -1,0 +1,8 @@
+{
+  "name": "oceanix-guard",
+  "version": "1.0.0",
+  "description": "Panel de monitoreo y alertas tempranas para granjas marinas",
+  "scripts": {
+    "test": "node --test"
+  }
+}
