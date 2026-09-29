@@ -18,6 +18,14 @@
   .valor { font-size: 32px; font-weight: bold; }
   .valor small { font-size: 14px; font-weight: normal; }
   svg { width: 100%; height: 55px; }
+  .tarjeta.critica { border-top-color: #c62828; background: #fff5f5; }
+  .tarjeta.critica .valor { color: #c62828; }
+  #alertas { list-style: none; padding: 0; margin: 0; }
+  #alertas li { background: #fff; border-left: 5px solid #999; padding: 8px 12px; margin-bottom: 6px; border-radius: 4px; font-size: 14px; }
+  #alertas li.critica { border-left-color: #c62828; }
+  #alertas li.normal { border-left-color: #2e7d32; }
+  button.peligro { background: #c62828; color: #fff; border: 0; border-radius: 4px; }
+  h2 { font-size: 18px; margin: 22px 0 10px; }
 </style>
 </head>
 <body>
@@ -35,11 +43,15 @@
       </select>
     </label>
     <button id="ahora">Actualizar ahora</button>
+    <button id="anomalia" class="peligro">Simular anomalía</button>
   </div>
   <div id="tarjetas" class="grid"></div>
+  <h2>Alertas</h2>
+  <ul id="alertas"><li>Sin alertas por ahora.</li></ul>
 </main>
 
 <script src="sensores.js"></script>
+<script src="alertas.js"></script>
 <script>
 const VARIABLES = [
   ['temperatura', 'Temperatura', '°C'],
@@ -48,6 +60,8 @@ const VARIABLES = [
 ];
 const datos = { 1: [], 2: [], 3: [] };
 let segundos = 30;
+const activas = {};   // alertas activas: 'jaula-variable' -> true
+let registro = [];    // historial de alertas mostradas
 
 function linea(serie) {
   if (serie.length < 2) return '';
@@ -62,30 +76,60 @@ function pintar() {
   const historial = datos[jaula];
   const ultima = historial[historial.length - 1];
   document.getElementById('tarjetas').innerHTML = VARIABLES.map(([k, nombre, unidad]) =>
-    `<div class="tarjeta">
+    `<div class="tarjeta ${activas[jaula + '-' + k] ? 'critica' : ''}">
        <h3>${nombre}</h3>
        <div class="valor">${ultima[k]} <small>${unidad}</small></div>
        <svg viewBox="0 0 200 55"><polyline fill="none" stroke="#0a7c86" stroke-width="2" points="${linea(historial.map(x => x[k]))}"/></svg>
      </div>`).join('');
 }
 
-function actualizar() {
+function revisarAlertas(jaula, lectura) {
+  const hoy = evaluarLectura(lectura);
+  const claves = hoy.map(a => jaula + '-' + a.variable);
+  hoy.forEach(a => {
+    const clave = jaula + '-' + a.variable;
+    if (!activas[clave]) {
+      activas[clave] = true;
+      registro.unshift({ tipo: 'critica', texto: 'CRÍTICA · Jaula ' + jaula + ' · ' + a.mensaje });
+    }
+  });
+  for (const clave in activas) {
+    if (clave.startsWith(jaula + '-') && !claves.includes(clave)) {
+      delete activas[clave];
+      registro.unshift({ tipo: 'normal', texto: 'Normalizada · Jaula ' + jaula + ' · ' + clave.split('-')[1] + ' volvió al rango permitido' });
+    }
+  }
+}
+
+function pintarAlertas() {
+  registro = registro.slice(0, 8);
+  document.getElementById('alertas').innerHTML = registro.length
+    ? registro.map(r => `<li class="${r.tipo}">${r.texto}</li>`).join('')
+    : '<li>Sin alertas por ahora.</li>';
+}
+
+function actualizar(conAnomalia) {
+  const jaulaActual = document.getElementById('jaula').value;
   for (const j in datos) {
-    datos[j].push(leerSensores(false));
+    const lectura = leerSensores(conAnomalia === true && j === jaulaActual);
+    datos[j].push(lectura);
     if (datos[j].length > 20) datos[j].shift();
+    revisarAlertas(j, lectura);
   }
   segundos = 30;
   pintar();
+  pintarAlertas();
 }
 
 document.getElementById('jaula').addEventListener('change', pintar);
-document.getElementById('ahora').addEventListener('click', actualizar);
+document.getElementById('ahora').addEventListener('click', () => actualizar(false));
+document.getElementById('anomalia').addEventListener('click', () => actualizar(true));
 setInterval(() => {
   segundos--;
-  if (segundos <= 0) actualizar();
+  if (segundos <= 0) actualizar(false);
   document.getElementById('cuenta').textContent = segundos;
 }, 1000);
-actualizar();
+actualizar(false);
 </script>
 </body>
 </html>
