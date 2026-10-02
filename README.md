@@ -18,21 +18,31 @@ En los próximos meses, los operadores podrán visualizar en tiempo real los par
 ## Sprint 1
 **Sprint Goal:** Al finalizar el Sprint, el equipo entregará el panel de monitoreo en tiempo real y el sistema de alertas tempranas para los parámetros ambientales.
 
-- PBI-01: Panel de monitoreo en tiempo real (8 puntos)
-- PBI-02: Alertas automáticas ante anomalías (5 puntos)
+- PBI-01: Panel de monitoreo en tiempo real (8 puntos) - Done
+- PBI-02: Alertas automáticas ante anomalías (5 puntos) - Done
 
-Los sensores se simulan con datos generados por el programa (`sensores.js`).
+Capacidad del Sprint: 13 puntos. Los sensores se simulan con datos generados por el programa (`sensores.js`).
+
+## Product Backlog
+El Product Backlog tiene **15 PBI** (64 puntos), cada uno con su historia de usuario y tres criterios de aceptación.
+
+- Detalle y estado de cada PBI: [docs/product-backlog.md](docs/product-backlog.md)
+- Un issue por PBI: [Issues del repositorio](https://github.com/Krash12342/oceanix-guard/issues)
 
 ## Enlaces
-- Tablero: pegar aquí el enlace del tablero (GitHub Projects o Trello)
-- Demo publicada: pegar aquí la URL de GitHub Pages
+- Tablero del Sprint: https://github.com/users/Krash12342/projects/1/views/1?layout_template=board
+- Demo publicada: https://Krash12342.github.io/oceanix-guard/
+- Video de la demostración: https://youtu.be/w6eADxrxIhk
+- Pull requests: [PR-01](https://github.com/Krash12342/oceanix-guard/pull/1) y [PR-02](https://github.com/Krash12342/oceanix-guard/pull/2)
+- Pipeline: [GitHub Actions](https://github.com/Krash12342/oceanix-guard/actions)
 
 ## Reglas de trabajo
-- Flujo del tablero: Backlog → Ready → In Progress → Review/Test → Done.
+- Flujo del tablero: Backlog, Ready, In Progress, Review/Test y Done.
 - Ramas: `feature/PBI-<número>-<descripción>`; defectos: `fix/PBI-<número>-<descripción>`.
 - Commits: `tipo(PBI-<número>): descripción`, por ejemplo `feat(PBI-01): agregar panel con datos simulados`.
-- Todo cambio entra por pull request con revisión de al menos otro integrante y las pruebas en verde.
-- Nunca se suben credenciales ni datos reales de clientes.
+- Todo cambio entra por pull request con revisión de otro integrante cuando esté disponible; si no, con una autorrevisión registrada en el PR con la lista de comprobación de la Definition of Done, y con las pruebas automáticas en verde.
+- Nunca se suben credenciales, tokens de sensores ni datos reales de clientes.
+- Las decisiones importantes se registran en la documentación del proyecto, no solo en el chat.
 
 ## Definition of Done
 - Criterios de aceptación verificados
